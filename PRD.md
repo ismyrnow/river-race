@@ -114,10 +114,10 @@ River Race is a 2D third-person arcade game where players control a person in a 
 - [x] Obstacle generation
 
 ### Phase 2: Gameplay Loop
-- [ ] Collision detection system
-- [ ] Coin collection system
-- [ ] Scoring system
-- [ ] Game over conditions
+- [x] Collision detection system
+- [x] Coin collection system
+- [x] Scoring system
+- [x] Game over conditions
 
 ### Phase 3: Polish & Content
 - [ ] Pixel art assets

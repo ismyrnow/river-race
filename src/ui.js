@@ -109,6 +109,10 @@ export function initUI(k, gameState) {
   k.scene("game", () => {
     console.log("Game scene loaded");
 
+    // Ensure game is marked as playing
+    gameState.isPlaying = true;
+    console.log("Game state set to playing:", gameState.isPlaying);
+
     // River background
     k.add([
       k.rect(k.width(), k.height()),
@@ -320,6 +324,87 @@ export function initUI(k, gameState) {
         console.log("Hit right boundary");
       }
     });
+
+    // Initialize collision detection within the game scene
+    console.log("Activating collision detection in game scene");
+
+    // Player collision with shore/banks
+    k.onCollide("player", "shore", (player, shore) => {
+      console.log("Player hit shore!");
+      gameOver(k, gameState);
+    });
+
+    // Player collision with rocks
+    k.onCollide("player", "rock", (player, rock) => {
+      console.log("Player hit rock!");
+      gameOver(k, gameState);
+    });
+
+    // Player collision with coins
+    k.onCollide("player", "coin", (player, coin) => {
+      console.log("Player collected coin!");
+      collectCoin(k, gameState, coin);
+    });
+
+    // Collision helper functions
+    function gameOver(k, gameState) {
+      if (!gameState.isPlaying) return; // Prevent multiple game overs
+
+      console.log("Game Over triggered!");
+      gameState.isPlaying = false;
+
+      // Add visual feedback
+      k.shake(10);
+
+      // Transition to game over screen after brief delay
+      setTimeout(() => {
+        k.go("gameOver");
+      }, 1000);
+    }
+
+    function collectCoin(k, gameState, coin) {
+      // Add to score
+      gameState.score += 10;
+      console.log("Score increased to:", gameState.score);
+
+      // Visual feedback - simple scale animation
+      coin.scale = 1.5;
+      coin.opacity = 0.7;
+
+      // Create particle effect
+      createCoinCollectEffect(k, coin.pos.x, coin.pos.y);
+
+      // Remove coin after brief animation
+      setTimeout(() => {
+        if (coin && coin.exists()) {
+          k.destroy(coin);
+        }
+      }, 100);
+    }
+
+    function createCoinCollectEffect(k, x, y) {
+      // Create simple particle effect for coin collection
+      for (let i = 0; i < 5; i++) {
+        const particle = k.add([
+          k.circle(3),
+          k.pos(x + k.rand(-10, 10), y + k.rand(-10, 10)),
+          k.color(255, 255, 0),
+          k.opacity(1),
+          k.lifespan(0.5),
+        ]);
+
+        // Animate particle with physics
+        particle.vel = k.vec2(k.rand(-50, 50), k.rand(-50, -20));
+
+        k.onUpdate(() => {
+          if (particle.exists()) {
+            particle.move(particle.vel);
+            particle.opacity -= k.dt() * 2;
+            particle.vel.y += 100 * k.dt(); // Gravity
+          }
+        });
+      }
+    }
 
     // Game HUD
     createGameHUD(k, gameState);
