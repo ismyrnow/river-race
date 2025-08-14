@@ -58,7 +58,7 @@ function loadSprites() {
   console.log("Loading game sprites...");
 
   // Player barrel sprite
-  k.loadSprite("barrel", "/sprites/barrel.png")
+  k.loadSprite("barrel", "./sprites/barrel.png")
     .then(() => {
       console.log("✅ Barrel sprite loaded successfully");
       // Log sprite dimensions for debugging
@@ -82,7 +82,7 @@ function loadSprites() {
     });
 
   // Coin sprite with animation frames
-  k.loadSprite("coin", "/sprites/coin.png", {
+  k.loadSprite("coin", "./sprites/coin.png", {
     sliceX: 8, // 8 frames horizontally
     sliceY: 1, // 1 row
     anims: {
@@ -102,7 +102,7 @@ function loadSprites() {
     });
 
   // Biome sprite sheet (9x5 grid of 16x16 tiles)
-  k.loadSprite("biome", "/sprites/biome.png", {
+  k.loadSprite("biome", "./sprites/biome.png", {
     sliceX: 9, // 9 tiles horizontally
     sliceY: 5, // 5 tiles vertically
   })
@@ -116,7 +116,7 @@ function loadSprites() {
     });
 
   // Grass tileset (11x7 grid of 16x16 tiles)
-  k.loadSprite("grass", "/sprites/grass.png", {
+  k.loadSprite("grass", "./sprites/grass.png", {
     sliceX: 11, // 11 tiles horizontally
     sliceY: 7, // 7 tiles vertically
   })
@@ -130,7 +130,7 @@ function loadSprites() {
     });
 
   // Rock sprite (keeping for fallback)
-  k.loadSprite("rock", "/sprites/rock.png")
+  k.loadSprite("rock", "./sprites/rock.png")
     .then(() => {
       console.log("✅ Rock sprite loaded successfully");
     })
