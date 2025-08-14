@@ -149,6 +149,111 @@ export function initUI(k, gameState) {
     ]);
     console.log("Player created successfully");
 
+    // Obstacle generation and downstream movement system
+    console.log("Initializing obstacle generation");
+
+    const riverSpeed = 150; // Speed objects move downstream
+    const riverWidth = k.width() - bankWidth * 2;
+    let obstacleTimer = 0;
+    let coinTimer = 0;
+
+    // Spawn obstacles (rocks)
+    k.onUpdate(() => {
+      obstacleTimer += k.dt();
+      coinTimer += k.dt();
+
+      // Spawn rocks every 2-3 seconds
+      if (obstacleTimer > k.rand(2, 3)) {
+        obstacleTimer = 0;
+
+        // Random position within river bounds
+        const x = bankWidth + k.rand(20, riverWidth - 40);
+        const y = -50; // Start above screen
+
+        k.add([
+          k.rect(40, 40),
+          k.pos(x, y),
+          k.anchor("center"),
+          k.color(100, 100, 100), // Gray rock
+          k.area(),
+          k.move(k.DOWN, riverSpeed),
+          "rock",
+          "obstacle",
+        ]);
+
+        console.log("Spawned rock at", x, y);
+      }
+
+      // Spawn coins every 1-2 seconds
+      if (coinTimer > k.rand(1, 2)) {
+        coinTimer = 0;
+
+        // Random position within river bounds
+        const x = bankWidth + k.rand(20, riverWidth - 20);
+        const y = -30; // Start above screen
+
+        k.add([
+          k.circle(12),
+          k.pos(x, y),
+          k.anchor("center"),
+          k.color(255, 215, 0), // Gold coin
+          k.area(),
+          k.move(k.DOWN, riverSpeed),
+          "coin",
+          "collectible",
+        ]);
+
+        console.log("Spawned coin at", x, y);
+      }
+    });
+
+    // Clean up objects that have moved off screen
+    k.onUpdate("obstacle", (obj) => {
+      if (obj.pos.y > k.height() + 50) {
+        k.destroy(obj);
+      }
+    });
+
+    k.onUpdate("collectible", (obj) => {
+      if (obj.pos.y > k.height() + 50) {
+        k.destroy(obj);
+      }
+    });
+
+    // Add some visual water flow effects
+    let flowTimer = 0;
+    k.onUpdate(() => {
+      flowTimer += k.dt();
+
+      // Spawn water flow indicators every 0.5 seconds
+      if (flowTimer > 0.5) {
+        flowTimer = 0;
+
+        // Create small flow indicators across the river
+        for (let i = 0; i < 3; i++) {
+          const x = bankWidth + k.rand(10, riverWidth - 10);
+          const y = -10;
+
+          k.add([
+            k.rect(4, 8),
+            k.pos(x, y),
+            k.anchor("center"),
+            k.color(100, 150, 255), // Light blue flow indicator
+            k.opacity(0.3),
+            k.move(k.DOWN, riverSpeed * 1.2),
+            "flow",
+          ]);
+        }
+      }
+    });
+
+    // Clean up flow indicators
+    k.onUpdate("flow", (flow) => {
+      if (flow.pos.y > k.height() + 20) {
+        k.destroy(flow);
+      }
+    });
+
     // Initialize controls within the game scene
     console.log("Initializing controls in game scene");
     let leftPressed = false;
@@ -203,7 +308,6 @@ export function initUI(k, gameState) {
       }
 
       // Keep player within river bounds (between shores)
-      const bankWidth = 100;
       const minX = bankWidth + 20; // Shore width + buffer
       const maxX = k.width() - bankWidth - 20;
 
