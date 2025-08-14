@@ -163,10 +163,59 @@ export function initUI(k, gameState) {
       "bank_parallax",
     ]);
 
+    // Add scrolling grass decoration tiles on banks - declare sizes first
+    const grassTileSize = 16;
+    const grassScale = 2; // Scale grass tiles to 32x32
+    const scaledGrassSize = grassTileSize * grassScale;
+
+    // Create scrolling grass system
+    const bankScrollSpeed = riverSpeed * 0.8; // Slightly slower than river objects
+
+    // Add brown edges to riverbanks
+    const edgeWidth = 32; // Width of brown edge (32x32 rectangles to match 2x scaled tiles)
+
+    // Left bank edge - using grass frame 13 - animated and tiled vertically
+    // Create a column of edge tiles that scroll like the grass
+    function createLeftBankEdgeRow(yPos) {
+      k.add([
+        k.sprite("grass", { frame: 13 }),
+        k.pos(bankWidth - edgeWidth / 2 + scaledGrassSize, yPos), // Position one column to the right
+        k.anchor("center"),
+        k.scale(2), // Match the grass scale (2x)
+        k.move(k.DOWN, bankScrollSpeed),
+        k.z(-1), // Above grass (which is at z(-2))
+        "scrolling_bank_edge",
+      ]);
+    }
+
+    // Right bank edge - using grass frame 11 - animated and tiled vertically
+    // Create a column of edge tiles that scroll like the grass
+    function createRightBankEdgeRow(yPos) {
+      k.add([
+        k.sprite("grass", { frame: 11 }),
+        k.pos(k.width() - bankWidth - edgeWidth / 2, yPos), // Position one tile left of current
+        k.anchor("center"),
+        k.scale(2), // Match the grass scale (2x)
+        k.move(k.DOWN, bankScrollSpeed),
+        k.z(-1), // Above grass (which is at z(-2))
+        "scrolling_bank_edge",
+      ]);
+    }
+
+    // Initial edge tile placement - fill the screen
+    for (
+      let y = -scaledGrassSize;
+      y < k.height() + scaledGrassSize;
+      y += scaledGrassSize
+    ) {
+      createLeftBankEdgeRow(y);
+      createRightBankEdgeRow(y);
+    }
+
     // Fixed collision areas for shores (these don't move and are invisible)
     k.add([
-      k.rect(bankWidth, k.height()),
-      k.pos(0, 0),
+      k.rect(bankWidth + edgeWidth, k.height()), // Extended to cover left edge tiles
+      k.pos(0, 0), // Starts at left edge to cover edge area
       k.area(),
       k.opacity(0), // Make collision areas invisible
       k.z(10), // Place collision areas above everything else but invisible
@@ -174,8 +223,8 @@ export function initUI(k, gameState) {
     ]);
 
     k.add([
-      k.rect(bankWidth, k.height()),
-      k.pos(k.width() - bankWidth, 0),
+      k.rect(bankWidth + edgeWidth, k.height()), // Extended to cover edge tiles
+      k.pos(k.width() - bankWidth - edgeWidth, 0), // Moved left to cover edge area
       k.area(),
       k.opacity(0), // Make collision areas invisible
       k.z(10), // Place collision areas above everything else but invisible
@@ -191,15 +240,8 @@ export function initUI(k, gameState) {
     });
 
     // Add scrolling grass decoration tiles on banks
-    const grassTileSize = 16;
-    const grassScale = 2; // Scale grass tiles to 32x32
-    const scaledGrassSize = grassTileSize * grassScale;
-
     // Use only row 7, column 1: (7-1) * 11 + (1-1) = 6 * 11 + 0 = 66
     const grassFrame = 66;
-
-    // Create scrolling grass system
-    const bankScrollSpeed = riverSpeed * 0.8; // Slightly slower than river objects
 
     // Function to create a row of grass at a given Y position
     function createGrassRow(yPos) {
@@ -265,6 +307,8 @@ export function initUI(k, gameState) {
       if (grassSpawnTimer >= grassSpawnInterval) {
         grassSpawnTimer = 0;
         createGrassRow(-scaledGrassSize);
+        createLeftBankEdgeRow(-scaledGrassSize); // Spawn new left edge tile with grass
+        createRightBankEdgeRow(-scaledGrassSize); // Spawn new right edge tile with grass
       }
     });
 
@@ -272,6 +316,13 @@ export function initUI(k, gameState) {
     k.onUpdate("scrolling_grass", (grass) => {
       if (grass.pos.y > k.height() + scaledGrassSize) {
         k.destroy(grass);
+      }
+    });
+
+    // Clean up bank edge tiles that have scrolled off screen
+    k.onUpdate("scrolling_bank_edge", (edge) => {
+      if (edge.pos.y > k.height() + scaledGrassSize) {
+        k.destroy(edge);
       }
     });
 
