@@ -113,14 +113,42 @@ export function initUI(k, gameState) {
     gameState.isPlaying = true;
     console.log("Game state set to playing:", gameState.isPlaying);
 
-    // River background
-    k.add([
-      k.rect(k.width(), k.height()),
-      k.color(65, 105, 225), // Royal blue for water
-      k.pos(0, 0),
-    ]);
+    // River background with animated water tiles
+    // Water tile sprite is 32x64 (2 frames of 32x32 each, stacked vertically)
+    const tileWidth = 32; // Each frame is 32px wide
+    const tileHeight = 32; // Each frame is 32px tall
+    const scale = 2.0; // Scale tiles up by 2x for better visibility
+    const scaledTileWidth = tileWidth * scale; // 64px when scaled
+    const scaledTileHeight = tileHeight * scale; // 64px when scaled
 
-    // River banks (shores)
+    const tilesX = Math.ceil(k.width() / scaledTileWidth) + 2; // Extra buffer tiles
+    const tilesY = Math.ceil(k.height() / scaledTileHeight) + 3; // Extra buffer tiles
+
+    // Create a grid of animated water tiles with 2x scaling
+    for (let x = -1; x < tilesX; x++) {
+      // Start from -1 for buffer
+      for (let y = -2; y < tilesY; y++) {
+        // Start from -2 for buffer
+        k.add([
+          k.sprite("water_tile", { anim: "flow" }),
+          k.pos(x * scaledTileWidth, y * scaledTileHeight),
+          k.anchor("topleft"), // Ensure consistent positioning
+          k.scale(scale), // 2x scale for better visibility
+          "water_tile",
+        ]);
+      }
+    }
+
+    // Add scrolling effect to water tiles
+    k.onUpdate("water_tile", (tile) => {
+      // Move tiles downstream slowly
+      tile.move(0, 25); // Adjusted speed for 64x64 scaled tiles
+
+      // Reset tiles that have moved off screen (using scaled dimensions)
+      if (tile.pos.y > k.height() + scaledTileHeight * 2) {
+        tile.pos.y = -scaledTileHeight * 2; // Reset further up for seamless loop
+      }
+    }); // River banks (shores)
     const bankWidth = 100;
 
     // Left bank
@@ -197,10 +225,10 @@ export function initUI(k, gameState) {
         const y = -30; // Start above screen
 
         k.add([
-          k.circle(12),
+          k.sprite("coin", { anim: "spin" }),
           k.pos(x, y),
           k.anchor("center"),
-          k.color(255, 215, 0), // Gold coin
+          k.scale(0.5), // Scale coin sprite appropriately
           k.area(),
           k.move(k.DOWN, riverSpeed),
           "coin",
@@ -385,7 +413,7 @@ export function initUI(k, gameState) {
       console.log("Score increased to:", gameState.score);
 
       // Visual feedback - simple scale animation
-      coin.scale = 1.5;
+      coin.scaleTo(1.5);
       coin.opacity = 0.7;
 
       // Create particle effect

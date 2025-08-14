@@ -2,16 +2,29 @@
 
 This directory contains the pixel art sprites for River Race.
 
-Currently using placeholder colored shapes. Future sprite assets will include:
+## Current Sprite Assets
 
-- `barrel.png` - Player character in wooden barrel (32x32)
-- `coin.png` - Collectible coin with rotation frames (16x16)
-- `rock.png` - River obstacles in various sizes (16x16, 32x32)
-- `water_tile.png` - Animated water texture (32x32)
-- `shore_left.png` - Left river bank texture (variable)
-- `shore_right.png` - Right river bank texture (variable)
+- `barrel.png` - Player character in wooden barrel
+- `coin.png` - Collectible coin with 8-frame animation (8 frames horizontally)
+- `rock.png` - River obstacle rocks
+- `water_tile.png` - Animated water texture (32x64, 2 frames vertically, each frame 32x32)
 
 ## Sprite Specifications
+
+**Water Tile (`water_tile.png`)**
+- Dimensions: 32x64 pixels
+- Animation: 2 frames stacked vertically (each frame 32x32)
+- Usage: Tiled background with flowing animation
+
+**Coin (`coin.png`)**  
+- Animation: 8 frames arranged horizontally
+- Usage: Spinning collectible animation
+
+**Barrel (`barrel.png`)**
+- Usage: Player character sprite
+
+**Rock (`rock.png`)**
+- Usage: Static obstacle sprites
 
 - **Style**: 8-bit pixel art
 - **Palette**: Limited color palette for retro feel
