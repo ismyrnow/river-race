@@ -175,10 +175,10 @@ export function initUI(k, gameState) {
         const y = -50; // Start above screen
 
         k.add([
-          k.rect(40, 40),
+          k.sprite("rock"),
           k.pos(x, y),
           k.anchor("center"),
-          k.color(100, 100, 100), // Gray rock
+          k.scale(0.4), // Scale rock sprite to half size
           k.area(),
           k.move(k.DOWN, riverSpeed),
           "rock",

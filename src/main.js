@@ -86,10 +86,14 @@ function loadSprites() {
     console.log("Using placeholder coin sprite");
   });
 
-  // Rock sprite (placeholder)
-  k.loadSprite("rock", "/sprites/rock.png").catch(() => {
-    console.log("Using placeholder rock sprite");
-  });
+  // Rock sprite
+  k.loadSprite("rock", "/sprites/rock.png")
+    .then(() => {
+      console.log("✅ Rock sprite loaded successfully");
+    })
+    .catch(() => {
+      console.log("❌ Failed to load rock sprite, using fallback");
+    });
 }
 
 // Export kaboom instance and game state for other modules
