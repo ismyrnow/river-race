@@ -53,13 +53,33 @@ function init() {
   }
 }
 
-// Load placeholder sprites
+// Load sprites
 function loadSprites() {
-  // Player barrel sprite (placeholder)
-  k.loadSprite("barrel", "/sprites/barrel.png").catch(() => {
-    // Fallback: create a simple colored rectangle
-    console.log("Using placeholder barrel sprite");
-  });
+  console.log("Loading game sprites...");
+
+  // Player barrel sprite
+  k.loadSprite("barrel", "/sprites/barrel.png")
+    .then(() => {
+      console.log("✅ Barrel sprite loaded successfully");
+      // Log sprite dimensions for debugging
+      const barrelSprite = k.getSprite("barrel");
+      if (barrelSprite) {
+        console.log(
+          "Barrel sprite dimensions:",
+          barrelSprite.width,
+          "x",
+          barrelSprite.height
+        );
+      }
+    })
+    .catch(() => {
+      console.log("❌ Failed to load barrel sprite, using fallback");
+      // Create fallback sprite
+      k.loadSprite(
+        "barrel",
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+      );
+    });
 
   // Coin sprite (placeholder)
   k.loadSprite("coin", "/sprites/coin.png").catch(() => {

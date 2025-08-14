@@ -144,14 +144,14 @@ export function initUI(k, gameState) {
     // Create player barrel
     console.log("Creating player in game scene");
     const player = k.add([
-      k.rect(40, 30),
+      k.sprite("barrel"),
       k.pos(k.width() / 2, k.height() - 100),
       k.anchor("center"),
-      k.color(139, 69, 19), // Brown barrel color
-      k.area(),
+      k.scale(0.2), // Scale down to 40% of original size
+      k.area(), // Auto-calculates collision area from sprite
       "player",
     ]);
-    console.log("Player created successfully");
+    console.log("Player created successfully with barrel sprite");
 
     // Obstacle generation and downstream movement system
     console.log("Initializing obstacle generation");
@@ -312,16 +312,33 @@ export function initUI(k, gameState) {
       }
 
       // Keep player within river bounds (between shores)
-      const minX = bankWidth + 20; // Shore width + buffer
-      const maxX = k.width() - bankWidth - 20;
+      // Use simple fixed boundaries that work reliably
+      const barrelRadius = 25; // Reasonable estimate for scaled barrel
+      const minX = bankWidth + barrelRadius; // Shore width + barrel radius
+      const maxX = k.width() - bankWidth - barrelRadius;
+
+      // Debug: Log boundary info once
+      if (!player.boundariesLogged) {
+        console.log(
+          "Boundary setup - bankWidth:",
+          bankWidth,
+          "minX:",
+          minX,
+          "maxX:",
+          maxX,
+          "screenWidth:",
+          k.width()
+        );
+        player.boundariesLogged = true;
+      }
 
       if (player.pos.x < minX) {
         player.pos.x = minX;
-        console.log("Hit left boundary");
+        console.log("Hit left boundary at x:", minX);
       }
       if (player.pos.x > maxX) {
         player.pos.x = maxX;
-        console.log("Hit right boundary");
+        console.log("Hit right boundary at x:", maxX);
       }
     });
 
@@ -443,7 +460,7 @@ export function initUI(k, gameState) {
       k.color(255, 255, 255),
     ]);
 
-    // High score
+    // High score logic
     const isNewHighScore = gameState.score > gameState.highScore;
     if (isNewHighScore) {
       gameState.highScore = gameState.score;
@@ -459,6 +476,16 @@ export function initUI(k, gameState) {
         k.pos(k.width() / 2, k.height() / 2 + 40),
         k.anchor("center"),
         k.color(255, 255, 0),
+      ]);
+    } else {
+      // Only show best score if it's NOT a new high score
+      k.add([
+        k.text(`Best: ${gameState.highScore}`, {
+          size: 24,
+        }),
+        k.pos(k.width() / 2, k.height() / 2 + 40),
+        k.anchor("center"),
+        k.color(255, 215, 0), // Gold color for best score
       ]);
     }
 
