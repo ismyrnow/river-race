@@ -115,6 +115,20 @@ function loadSprites() {
       console.log("❌ Failed to load biome sprite sheet, using fallback");
     });
 
+  // Grass tileset (11x7 grid of 16x16 tiles)
+  k.loadSprite("grass", "/sprites/grass.png", {
+    sliceX: 11, // 11 tiles horizontally
+    sliceY: 7, // 7 tiles vertically
+  })
+    .then(() => {
+      console.log(
+        "✅ Grass tileset loaded successfully (11x7 tiles, 16x16 each)"
+      );
+    })
+    .catch(() => {
+      console.log("❌ Failed to load grass tileset, using fallback");
+    });
+
   // Rock sprite (keeping for fallback)
   k.loadSprite("rock", "/sprites/rock.png")
     .then(() => {

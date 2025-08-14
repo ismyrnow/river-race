@@ -118,28 +118,162 @@ export function initUI(k, gameState) {
       k.rect(k.width(), k.height()),
       k.color(155, 212, 195), // Color #9bd4c3
       k.pos(0, 0),
+      k.z(-10), // Ensure river background is behind everything
     ]);
 
-    // River banks (shores) with grass tiles - OPTIMIZED
+    // River banks (shores) with subtle parallax movement
     const bankWidth = 100;
+    const riverSpeed = 150; // Speed objects move downstream
+    const bankParallaxSpeed = 20; // Very slow parallax movement
 
-    // Left bank
+    // Static bank backgrounds (never move - ensure full coverage)
     k.add([
       k.rect(bankWidth, k.height()),
       k.pos(0, 0),
-      k.color(139, 69, 19), // Brown for shore
-      k.area(),
-      "shore",
+      k.color(192, 212, 112), // RGB(192, 212, 112) - light green
+      k.z(-6), // Just above river, below moving banks
     ]);
 
-    // Right bank
     k.add([
       k.rect(bankWidth, k.height()),
       k.pos(k.width() - bankWidth, 0),
-      k.color(139, 69, 19),
+      k.color(192, 212, 112), // RGB(192, 212, 112) - light green
+      k.z(-6), // Just above river, below moving banks
+    ]);
+
+    // Left bank - visual background with subtle movement (for parallax effect only)
+    const leftBank = k.add([
+      k.rect(bankWidth, k.height() + 100), // Slightly taller for movement
+      k.pos(0, -50),
+      k.color(192, 212, 112), // RGB(192, 212, 112) - light green
+      k.move(k.DOWN, bankParallaxSpeed),
+      k.z(-5), // Above static banks
+      k.opacity(0.3), // Semi-transparent for subtle parallax
+      "bank_parallax",
+    ]);
+
+    // Right bank - visual background with subtle movement (for parallax effect only)
+    const rightBank = k.add([
+      k.rect(bankWidth, k.height() + 100), // Slightly taller for movement
+      k.pos(k.width() - bankWidth, -50),
+      k.color(192, 212, 112), // RGB(192, 212, 112) - light green
+      k.move(k.DOWN, bankParallaxSpeed),
+      k.z(-5), // Above static banks
+      k.opacity(0.3), // Semi-transparent for subtle parallax
+      "bank_parallax",
+    ]);
+
+    // Fixed collision areas for shores (these don't move and are invisible)
+    k.add([
+      k.rect(bankWidth, k.height()),
+      k.pos(0, 0),
       k.area(),
+      k.opacity(0), // Make collision areas invisible
+      k.z(10), // Place collision areas above everything else but invisible
       "shore",
     ]);
+
+    k.add([
+      k.rect(bankWidth, k.height()),
+      k.pos(k.width() - bankWidth, 0),
+      k.area(),
+      k.opacity(0), // Make collision areas invisible
+      k.z(10), // Place collision areas above everything else but invisible
+      "shore",
+    ]);
+
+    // Reset bank positions when they scroll too far
+    k.onUpdate("bank_parallax", (bank) => {
+      if (bank.pos.y > 50) {
+        // Back to original timing
+        bank.pos.y = -50; // Back to original position
+      }
+    });
+
+    // Add scrolling grass decoration tiles on banks
+    const grassTileSize = 16;
+    const grassScale = 2; // Scale grass tiles to 32x32
+    const scaledGrassSize = grassTileSize * grassScale;
+
+    // Use only row 7, column 1: (7-1) * 11 + (1-1) = 6 * 11 + 0 = 66
+    const grassFrame = 66;
+
+    // Create scrolling grass system
+    const bankScrollSpeed = riverSpeed * 0.8; // Slightly slower than river objects
+
+    // Function to create a row of grass at a given Y position
+    function createGrassRow(yPos) {
+      // Left bank grass - proper grid placement
+      const leftBankTilesX = Math.floor(bankWidth / scaledGrassSize);
+      for (let x = 0; x < leftBankTilesX; x++) {
+        if (k.rand() < 0.4) {
+          // 40% chance for each tile
+          k.add([
+            k.sprite("grass", { frame: 66 }),
+            k.pos(
+              x * scaledGrassSize + scaledGrassSize / 2, // Center in grid cell
+              yPos
+            ),
+            k.anchor("center"),
+            k.scale(grassScale),
+            k.move(k.DOWN, bankScrollSpeed),
+            k.z(-2), // Ensure grass is below HUD elements
+            "scrolling_grass",
+          ]);
+        }
+      }
+
+      // Right bank grass - proper grid placement, ensuring it stays within bank bounds
+      const rightBankStartX = k.width() - bankWidth;
+      for (let x = 0; x < leftBankTilesX; x++) {
+        if (k.rand() < 0.4) {
+          // 40% chance for each tile
+          const grassX =
+            rightBankStartX + x * scaledGrassSize + scaledGrassSize / 2;
+          // Ensure grass stays within the right bank boundaries
+          if (grassX >= rightBankStartX + 16 && grassX <= k.width() - 16) {
+            k.add([
+              k.sprite("grass", { frame: 66 }),
+              k.pos(grassX, yPos),
+              k.anchor("center"),
+              k.scale(grassScale),
+              k.move(k.DOWN, bankScrollSpeed),
+              k.z(-2), // Ensure grass is below HUD elements
+              "scrolling_grass",
+            ]);
+          }
+        }
+      }
+    }
+
+    // Initial grass placement - fill the screen
+    for (
+      let y = -scaledGrassSize;
+      y < k.height() + scaledGrassSize;
+      y += scaledGrassSize
+    ) {
+      createGrassRow(y);
+    }
+
+    // Continuously spawn new grass rows at the top
+    let grassSpawnTimer = 0;
+    const grassSpawnInterval = scaledGrassSize / bankScrollSpeed; // Time for one tile height
+
+    k.onUpdate(() => {
+      grassSpawnTimer += k.dt();
+
+      if (grassSpawnTimer >= grassSpawnInterval) {
+        grassSpawnTimer = 0;
+        createGrassRow(-scaledGrassSize);
+      }
+    });
+
+    // Clean up grass that has scrolled off screen
+    k.onUpdate("scrolling_grass", (grass) => {
+      if (grass.pos.y > k.height() + scaledGrassSize) {
+        k.destroy(grass);
+      }
+    });
 
     // Create player barrel
     console.log("Creating player in game scene");
@@ -156,7 +290,6 @@ export function initUI(k, gameState) {
     // Obstacle generation and downstream movement system
     console.log("Initializing obstacle generation");
 
-    const riverSpeed = 150; // Speed objects move downstream
     const riverWidth = k.width() - bankWidth * 2;
     let obstacleTimer = 0;
     let coinTimer = 0;
@@ -224,27 +357,62 @@ export function initUI(k, gameState) {
       }
     });
 
-    // Add some visual water flow effects
+    // Enhanced water flow effects for better movement illusion
     let flowTimer = 0;
     k.onUpdate(() => {
       flowTimer += k.dt();
 
-      // Spawn water flow indicators every 0.5 seconds
-      if (flowTimer > 0.5) {
+      // Spawn water flow indicators more frequently
+      if (flowTimer > 0.2) {
         flowTimer = 0;
 
-        // Create small flow indicators across the river
-        for (let i = 0; i < 3; i++) {
-          const x = bankWidth + k.rand(10, riverWidth - 10);
+        // Create varied flow indicators across the river
+        for (let i = 0; i < 5; i++) {
+          // Ensure flow indicators stay well within river bounds
+          const x = bankWidth + k.rand(20, riverWidth - 40);
           const y = -10;
 
+          // Vary the flow indicator types
+          const flowType = k.rand();
+
+          if (flowType < 0.7) {
+            // Small bubbles
+            k.add([
+              k.circle(k.rand(2, 4)),
+              k.pos(x, y),
+              k.anchor("center"),
+              k.color(120, 180, 255),
+              k.opacity(k.rand(0.2, 0.5)),
+              k.move(k.DOWN, riverSpeed * k.rand(1.1, 1.4)),
+              "flow",
+            ]);
+          } else {
+            // Elongated flow lines
+            k.add([
+              k.rect(k.rand(2, 5), k.rand(8, 15)),
+              k.pos(x, y),
+              k.anchor("center"),
+              k.color(100, 150, 255),
+              k.opacity(k.rand(0.2, 0.4)),
+              k.move(k.DOWN, riverSpeed * k.rand(1.0, 1.3)),
+              "flow",
+            ]);
+          }
+        }
+
+        // Add occasional larger swirls
+        if (k.rand() < 0.3) {
+          // Keep swirls well away from banks
+          const x = bankWidth + k.rand(40, riverWidth - 80);
+          const y = -15;
+
           k.add([
-            k.rect(4, 8),
+            k.circle(8),
             k.pos(x, y),
             k.anchor("center"),
-            k.color(100, 150, 255), // Light blue flow indicator
-            k.opacity(0.3),
-            k.move(k.DOWN, riverSpeed * 1.2),
+            k.color(80, 120, 200),
+            k.opacity(0.2),
+            k.move(k.DOWN, riverSpeed * 0.9),
             "flow",
           ]);
         }
