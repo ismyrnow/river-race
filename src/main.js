@@ -101,35 +101,27 @@ function loadSprites() {
       console.log("❌ Failed to load coin sprite, using fallback");
     });
 
-  // Rock sprite
+  // Biome sprite sheet (9x5 grid of 16x16 tiles)
+  k.loadSprite("biome", "/sprites/biome.png", {
+    sliceX: 9, // 9 tiles horizontally
+    sliceY: 5, // 5 tiles vertically
+  })
+    .then(() => {
+      console.log(
+        "✅ Biome sprite sheet loaded successfully (9x5 tiles, 16x16 each)"
+      );
+    })
+    .catch(() => {
+      console.log("❌ Failed to load biome sprite sheet, using fallback");
+    });
+
+  // Rock sprite (keeping for fallback)
   k.loadSprite("rock", "/sprites/rock.png")
     .then(() => {
       console.log("✅ Rock sprite loaded successfully");
     })
     .catch(() => {
       console.log("❌ Failed to load rock sprite, using fallback");
-    });
-
-  // Water tile sprite with 2-frame animation
-  k.loadSprite("water_tile", "/sprites/water_tile.png", {
-    sliceX: 1, // 1 frame horizontally (32px wide)
-    sliceY: 2, // 2 frames vertically (32px each, total 64px height)
-    anims: {
-      flow: {
-        from: 0,
-        to: 1,
-        speed: 3, // Slow animation for gentle water flow
-        loop: true,
-      },
-    },
-  })
-    .then(() => {
-      console.log(
-        "✅ Animated water tile sprite loaded successfully (2 frames, 32x32 each)"
-      );
-    })
-    .catch(() => {
-      console.log("❌ Failed to load water tile sprite, using fallback");
     });
 }
 
