@@ -149,6 +149,74 @@ export function initUI(k, gameState) {
     ]);
     console.log("Player created successfully");
 
+    // Initialize controls within the game scene
+    console.log("Initializing controls in game scene");
+    let leftPressed = false;
+    let rightPressed = false;
+
+    // Keyboard controls
+    k.onKeyDown("left", () => {
+      leftPressed = true;
+      console.log("Left key pressed");
+    });
+    k.onKeyDown("right", () => {
+      rightPressed = true;
+      console.log("Right key pressed");
+    });
+    k.onKeyDown("a", () => {
+      leftPressed = true;
+      console.log("A key pressed");
+    });
+    k.onKeyDown("d", () => {
+      rightPressed = true;
+      console.log("D key pressed");
+    });
+
+    k.onKeyRelease("left", () => {
+      leftPressed = false;
+      console.log("Left key released");
+    });
+    k.onKeyRelease("right", () => {
+      rightPressed = false;
+      console.log("Right key released");
+    });
+    k.onKeyRelease("a", () => {
+      leftPressed = false;
+      console.log("A key released");
+    });
+    k.onKeyRelease("d", () => {
+      rightPressed = false;
+      console.log("D key released");
+    });
+
+    // Movement system
+    k.onUpdate("player", (player) => {
+      const moveSpeed = 300; // pixels per second
+
+      if (leftPressed) {
+        player.move(-moveSpeed, 0);
+        console.log("Moving left, player pos:", player.pos.x);
+      }
+      if (rightPressed) {
+        player.move(moveSpeed, 0);
+        console.log("Moving right, player pos:", player.pos.x);
+      }
+
+      // Keep player within river bounds (between shores)
+      const bankWidth = 100;
+      const minX = bankWidth + 20; // Shore width + buffer
+      const maxX = k.width() - bankWidth - 20;
+
+      if (player.pos.x < minX) {
+        player.pos.x = minX;
+        console.log("Hit left boundary");
+      }
+      if (player.pos.x > maxX) {
+        player.pos.x = maxX;
+        console.log("Hit right boundary");
+      }
+    });
+
     // Game HUD
     createGameHUD(k, gameState);
 

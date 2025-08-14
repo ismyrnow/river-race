@@ -4,15 +4,39 @@ export function initControls(k) {
   let rightPressed = false;
 
   // Keyboard controls
-  k.onKeyDown("left", () => (leftPressed = true));
-  k.onKeyDown("right", () => (rightPressed = true));
-  k.onKeyDown("a", () => (leftPressed = true));
-  k.onKeyDown("d", () => (rightPressed = true));
+  k.onKeyDown("left", () => {
+    leftPressed = true;
+    console.log("Left key pressed");
+  });
+  k.onKeyDown("right", () => {
+    rightPressed = true;
+    console.log("Right key pressed");
+  });
+  k.onKeyDown("a", () => {
+    leftPressed = true;
+    console.log("A key pressed");
+  });
+  k.onKeyDown("d", () => {
+    rightPressed = true;
+    console.log("D key pressed");
+  });
 
-  k.onKeyRelease("left", () => (leftPressed = false));
-  k.onKeyRelease("right", () => (rightPressed = false));
-  k.onKeyRelease("a", () => (leftPressed = false));
-  k.onKeyRelease("d", () => (rightPressed = false));
+  k.onKeyRelease("left", () => {
+    leftPressed = false;
+    console.log("Left key released");
+  });
+  k.onKeyRelease("right", () => {
+    rightPressed = false;
+    console.log("Right key released");
+  });
+  k.onKeyRelease("a", () => {
+    leftPressed = false;
+    console.log("A key released");
+  });
+  k.onKeyRelease("d", () => {
+    rightPressed = false;
+    console.log("D key released");
+  });
 
   // Touch controls
   let leftTouching = false;
@@ -75,9 +99,11 @@ export function initControls(k) {
 
     if (leftPressed || leftTouching) {
       player.move(-moveSpeed, 0);
+      console.log("Moving left, player pos:", player.pos.x);
     }
     if (rightPressed || rightTouching) {
       player.move(moveSpeed, 0);
+      console.log("Moving right, player pos:", player.pos.x);
     }
 
     // Keep player within river bounds (between shores)
@@ -87,9 +113,11 @@ export function initControls(k) {
 
     if (player.pos.x < minX) {
       player.pos.x = minX;
+      console.log("Hit left boundary");
     }
     if (player.pos.x > maxX) {
       player.pos.x = maxX;
+      console.log("Hit right boundary");
     }
   });
 

@@ -15,7 +15,7 @@ console.log("KAPLAY initialized successfully");
 
 // Import game modules one by one
 import { initUI } from "./ui.js";
-import { initControls } from "./controls.js";
+// import { initControls } from "./controls.js"; // Now handled within game scene
 import { initCollisions } from "./collision.js";
 // import { initGameObjects } from "./gameObjects.js"; // Still broken - investigating
 
@@ -37,8 +37,8 @@ function init() {
     console.log("Initializing UI...");
     initUI(k, gameState);
 
-    console.log("Initializing controls...");
-    initControls(k);
+    // console.log("Initializing controls...");
+    // initControls(k); // Now handled within game scene
 
     console.log("Initializing collisions...");
     initCollisions(k, gameState);
